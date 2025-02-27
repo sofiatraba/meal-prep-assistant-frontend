@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 
 interface Ingredient {
   name: string;
@@ -22,6 +23,8 @@ export default function RecipeForm() {
     cookTime: 0,
     category: 'breakfast',
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleIngredientChange = (
     index: number,
@@ -33,8 +36,30 @@ export default function RecipeForm() {
     setRecipe({ ...recipe, ingredients: updatedIngredients }); // Update state
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    axios
+      .post('http://localhost:4000/api/recipes', recipe)
+      .then((response) => {
+        console.log('Recipe saved:', response.data);
+        setRecipe(response.data);
+      })
+      .catch((error) => {
+        console.error('Error saving recipe:', error);
+        setError('An error occurred while saving the recipe.Please try again.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   return (
-    <form className="flex flex-col space-y-4 mt-6">
+    <form
+      className="flex flex-col space-y-4 mt-6"
+      key={recipe._id || 'new'}
+      onSubmit={handleSubmit}
+    >
       <label>
         <span className="block font-semibold">Recipe Title</span>
         <input
@@ -53,6 +78,7 @@ export default function RecipeForm() {
           type="number"
           placeholder="Cook time in minutes"
           className="border p-2 rounded-lg text-black"
+          value={recipe.cookTime}
           onChange={(e) =>
             setRecipe({ ...recipe, cookTime: parseInt(e.target.value) })
           }
@@ -94,7 +120,11 @@ export default function RecipeForm() {
       </button>
       <label>
         <span className="block font-semibold">Category</span>
-        <select name="category" className="border p-2 rounded-lg text-black">
+        <select
+          name="category"
+          className="border p-2 rounded-lg text-black"
+          onChange={(e) => setRecipe({ ...recipe, category: e.target.value })}
+        >
           <option value="breakfast">Breakfast</option>
           <option value="lunch">Lunch</option>
           <option value="dinner">Dinner</option>
@@ -114,10 +144,14 @@ export default function RecipeForm() {
           />
         </label>
       </div>
-      <input
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 mb-3"
+      <button
+        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
         type="submit"
-      />
+        disabled={loading}
+      >
+        {loading ? 'Submitting...' : 'Submit'}
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
     </form>
   );
 }
