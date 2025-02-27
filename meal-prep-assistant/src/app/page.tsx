@@ -37,8 +37,10 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-6">Meal Prep Recipes</h1>
+      <p className="text-center text-gray-600">
+        Here are some recipes to help you get started with meal prepping.
+      </p>
       <RecipeForm />
-      <h2 className="text-2xl font-semibold mt-8">Recipes</h2>
       <ul className="space-y-4">
         {recipes.map((recipe) => (
           <li key={recipe._id} className="border p-4 rounded-lg shadow-md">
