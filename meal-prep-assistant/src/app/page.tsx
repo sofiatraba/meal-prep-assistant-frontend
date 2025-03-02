@@ -3,6 +3,7 @@
 /* eslint-disable prettier/prettier */
 import { useEffect, useState } from 'react';
 import RecipeForm from './components/RecipeForm';
+import axios from 'axios';
 
 interface Ingredient {
   name: string;
@@ -10,7 +11,7 @@ interface Ingredient {
 }
 
 interface Recipe {
-  _id: string;
+  _id?: string;
   title: string;
   ingredients: Ingredient[];
   instructions: string;
@@ -22,17 +23,18 @@ export default function Home() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/recipes')
+    axios
+      .get('http://localhost:4000/api/recipes')
       .then((response) => {
         console.log('Raw response:', response);
-        return response.json();
-      })
-      .then((data) => {
-        console.log('Parsed JSON:', data);
-        setRecipes(data);
+        setRecipes(response.data);
       })
       .catch((error) => console.error('Error fetching recipes:', error));
   }, []);
+
+  const addNewRecipe = (newRecipe: Recipe) => {
+    setRecipes([...recipes, newRecipe]);
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -40,7 +42,7 @@ export default function Home() {
       <p className="text-center text-gray-600">
         Here are some recipes to help you get started with meal prepping.
       </p>
-      <RecipeForm />
+      <RecipeForm addNewRecipe={addNewRecipe} />
       <ul className="space-y-4">
         {recipes.map((recipe) => (
           <li key={recipe._id} className="border p-4 rounded-lg shadow-md">
