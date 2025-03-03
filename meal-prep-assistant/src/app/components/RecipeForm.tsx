@@ -15,7 +15,11 @@ interface Recipe {
   category: string;
 }
 
-export default function RecipeForm() {
+interface RecipeFormProps {
+  addNewRecipe: (newRecipe: Recipe) => void;
+}
+
+export default function RecipeForm({ addNewRecipe }: RecipeFormProps) {
   const [recipe, setRecipe] = useState<Recipe>({
     title: '',
     ingredients: [{ name: '', quantity: '' }],
@@ -43,7 +47,14 @@ export default function RecipeForm() {
       .post('http://localhost:4000/api/recipes', recipe)
       .then((response) => {
         console.log('Recipe saved:', response.data);
-        setRecipe(response.data);
+        addNewRecipe(response.data);
+        setRecipe({
+          title: '',
+          ingredients: [{ name: '', quantity: '' }],
+          instructions: '',
+          cookTime: 0,
+          category: 'breakfast',
+        });
       })
       .catch((error) => {
         console.error('Error saving recipe:', error);
